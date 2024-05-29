@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">CurrencyConverterApp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="currency_converter">Currency Converter</string>
+    <string name="enter_amount">Enter Amount</string>
+    <string name="convert">Convert</string>
+    <string name="converted_amount">Converted Amount</string>
+    <string name="result">Result</string>
+    <string name="amount">Amount</string>
+    <string name="to">To</string>
+    <string name="from">Conversion In Other Currencies</string>
+    <string name="usd">USD</string>
+    <string name="amount_must_be_greater_than_zero">Amount must be greater than zero.</string>
+    <string name="to_currency_rate_must_be_greater_than_zero">To currency rate must be greater than zero.</string>
+    <string name="no_internet_connection">No Internet Connection</string>
+    <string name="failed_to_fetch_currencies">Failed to fetch currencies</string>
+    <string name="please_enter_the_valid_amount">Please enter the valid amount</string>
+    <string name="please_enter_the_amount">Please enter the amount greater than 0</string>
+    <string name="please_enter_the_convert_amount">Please enter the convert amount</string>
+</resources>
