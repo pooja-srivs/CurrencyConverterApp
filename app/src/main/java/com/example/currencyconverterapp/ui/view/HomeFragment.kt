@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.currencyconverterapp.R
@@ -19,9 +20,7 @@ import com.example.currencyconverterapp.ui.adapter.CurrencyItem
 import com.example.currencyconverterapp.ui.adapter.CurrencySpinnerAdapter
 import com.example.currencyconverterapp.ui.model.UIState
 import com.example.currencyconverterapp.viewmodel.CurrencyViewModel
-import com.example.currencyconverterapp.viewmodel.CurrencyViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -30,9 +29,7 @@ class HomeFragment : Fragment() {
         private const val AMOUNT_GREATER_THAN_ZERO = "101"
     }
 
-    @Inject
-    lateinit var factory: CurrencyViewModelFactory
-    private val viewModel by activityViewModels<CurrencyViewModel> { factory }
+    private val viewModel: CurrencyViewModel by hiltNavGraphViewModels(R.id.nav_graph)
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: CurrencySpinnerAdapter

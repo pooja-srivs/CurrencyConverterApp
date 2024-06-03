@@ -6,7 +6,8 @@ import com.example.currencyconverterapp.domain.usecase.currency.FetchCurrencyUse
 import com.example.currencyconverterapp.domain.usecase.convert.FetchCurrencyConvertUseCase
 import javax.inject.Inject
 
-class CurrencyViewModelFactory @Inject constructor(
+// Not required in HILT DI. HILT automatically handles the factory creation with the help of @HiltViewModel
+class CurrencyViewModelFactory (
     private val fetchCurrencyUseCase: FetchCurrencyUseCase,
     private val fetchCurrencyConvertUseCase: FetchCurrencyConvertUseCase
 ): ViewModelProvider.NewInstanceFactory() {

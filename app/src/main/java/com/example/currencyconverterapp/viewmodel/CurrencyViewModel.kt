@@ -10,10 +10,12 @@ import com.example.currencyconverterapp.ui.adapter.CurrencyItem
 import com.example.currencyconverterapp.ui.mapper.toDomainModel
 import com.example.currencyconverterapp.ui.model.CurrencyRateUiModel
 import com.example.currencyconverterapp.ui.model.UIState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class CurrencyViewModel @Inject constructor(
     private val fetchCurrencyUseCase: FetchCurrencyUseCase,
     private val fetchCurrencyConvertUseCase: FetchCurrencyConvertUseCase

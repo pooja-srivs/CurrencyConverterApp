@@ -48,6 +48,11 @@ class CurrencyRepositoryImpl @Inject constructor(
         if (lastRefreshTime == 0L) {
             return true
         }
+        /**
+         * System.currentTimeMillis() - why not to use?
+        * Manual change: Users can change their time in the Setting page.
+        * Automatic change: Current time can be changed because of different time zones.
+        *  If a user run across the time zone, the current time will be changed.*/
         val result = System.currentTimeMillis() - lastRefreshTime > REFRESH_INTERVAL_MS
         return result
     }
