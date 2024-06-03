@@ -7,9 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.currencyconverterapp.R
 import com.example.currencyconverterapp.common.afterTextChanged
@@ -21,6 +22,7 @@ import com.example.currencyconverterapp.ui.adapter.CurrencySpinnerAdapter
 import com.example.currencyconverterapp.ui.model.UIState
 import com.example.currencyconverterapp.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -55,32 +57,40 @@ class HomeFragment : Fragment() {
     }
 
     private fun setUpSinnerView() {
-        viewModel.currencyLiveData.observe(viewLifecycleOwner, Observer { response ->
-            binding.progress.visibility = View.GONE
-            when(response) {
-                is UIState.Success -> {
-                    binding.apply {
-                        adapter = CurrencySpinnerAdapter(requireContext(), response.value)
-                        toCurrencySpinner.adapter = adapter
-                        toCurrencySpinner.setSelection(viewModel.getSelectedCurrencyPosition())
-                        val currencyList = response.value.mapIndexed() { index, item ->
-                            CurrencyItem(
-                                id = index+1,
-                                rate = item.rate,
-                                currency = item.currency,
-                                convertedAmount = 0.0
-                            )
+        lifecycleScope.launch {
+            viewModel.currencyStateFlow
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { uiState ->
+                    when(uiState) {
+                        is UIState.Loading -> { binding.progress.visibility = View.VISIBLE }
+                        is UIState.Success -> {
+                            binding.apply {
+                                progress.visibility = View.GONE
+                                adapter = CurrencySpinnerAdapter(requireContext(), uiState.value)
+                                toCurrencySpinner.adapter = adapter
+                                toCurrencySpinner.setSelection(viewModel.getSelectedCurrencyPosition())
+                                val currencyList = uiState.value.mapIndexed() { index, item ->
+                                    CurrencyItem(
+                                        id = index+1,
+                                        rate = item.rate,
+                                        currency = item.currency,
+                                        convertedAmount = 0.0
+                                    )
+                                }
+                                viewModel.setCurrencyList(currencyList)
+                                convertedCurrencyAdapter.submitList(currencyList)
+                            }
                         }
-                        viewModel.setCurrencyList(currencyList)
-                        convertedCurrencyAdapter.submitList(currencyList)
+
+                        is UIState.Failure ->{
+                            binding.progress.visibility = View.GONE
+                            Toast.makeText(requireContext(),
+                                getString(R.string.failed_to_fetch_currencies), Toast.LENGTH_SHORT).show()
+                        }
                     }
+
                 }
-                is UIState.Failure -> {
-                    Toast.makeText(requireContext(),
-                        getString(R.string.failed_to_fetch_currencies), Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+        }
     }
 
     private fun setListener() {
@@ -124,25 +134,30 @@ class HomeFragment : Fragment() {
                 )
             }
 
-            viewModel.convertedAmountLiveData.observe(viewLifecycleOwner, Observer { currencyState ->
-                when(currencyState) {
-
-                    is UIState.Success -> {
-                        convertedCurrencyAdapter.submit(currencyState.value)
-                    }
-
-                    is UIState.Failure -> {
-                        when(currencyState.throwable.message) {
-                            AMOUNT_GREATER_THAN_ZERO -> {
-                                Toast.makeText(requireContext(),requireActivity().getString(R.string.amount_must_be_greater_than_zero), Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                viewModel.convertedAmountStateFlow
+                    .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                    .collect { uiState ->
+                        when(uiState) {
+                            is UIState.Loading -> { binding.progress.visibility = View.VISIBLE }
+                            is UIState.Success -> {
+                                binding.progress.visibility = View.GONE
+                                convertedCurrencyAdapter.submit(uiState.value)
                             }
-                            else -> {
-                                Toast.makeText(requireContext(),requireActivity().getString(R.string.amount_must_be_greater_than_zero), Toast.LENGTH_SHORT).show()
+                            is UIState.Failure ->{
+                                binding.progress.visibility = View.GONE
+                                when(uiState.throwable.message) {
+                                    AMOUNT_GREATER_THAN_ZERO -> {
+                                        Toast.makeText(requireContext(),requireActivity().getString(R.string.amount_must_be_greater_than_zero), Toast.LENGTH_SHORT).show()
+                                    }
+                                    else -> {
+                                        Toast.makeText(requireContext(),requireActivity().getString(R.string.amount_must_be_greater_than_zero), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            })
+            }
         }
     }
 
